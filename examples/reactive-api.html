@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+<body>
+<script src="../node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
+<script>
+	console.log(VueReactivity);
+	const {reactive, shallowReactive, readonly, shallowReadonly} = VueReactivity;
+	let obj = {
+		name: 'xiaoming',
+		age: {
+			n: 11
+		}
+	};
+	let proxy = shallowReadonly(obj);
+
+	console.log(proxy);
+	console.log(proxy.age);
+	proxy.age = 12;
+</script>
+</body>
+</html>
