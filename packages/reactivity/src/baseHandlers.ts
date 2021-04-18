@@ -1,5 +1,7 @@
 import {extend, isObject} from "@vue/shared";
 import {readonly, reactive} from "./reactive";
+import {track} from "./effect";
+import {TrackOpTypes} from "./operators";
 
 const get = createGetter();
 const shallowGet = createGetter(false, true);
@@ -38,6 +40,7 @@ function createGetter(isReadonly = false, shallow = false) {
         if (!isReadonly) {
 
             // 收集依赖
+            track(target, TrackOpTypes.GET, key);
         }
         // 深度
         if (shallow) {

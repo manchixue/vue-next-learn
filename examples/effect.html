@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script src="../node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
+<script>
+	const {effect, reactive} = VueReactivity;
+	let obj = {
+		name: 'xiaoming',
+		age: {
+			n: 11
+		}
+	};
+	let proxy = reactive(obj);
+	effect(() => {
+		app.innerHTML = `${proxy.name}今年${proxy.age.n}岁了`
+	})
+
+	setTimeout(() => {
+		proxy.age = 12;
+	}, 1000);
+</script>
+</body>
+</html>
