@@ -1,7 +1,7 @@
-import {extend, isObject} from "@vue/shared";
+import {extend, hasChanged, hasOwn, isArray, isIntegerKey, isObject} from "@vue/shared";
 import {readonly, reactive} from "./reactive";
-import {track} from "./effect";
-import {TrackOpTypes} from "./operators";
+import {track, trigger} from "./effect";
+import {TrackOpTypes, TriggerOrTypes} from "./operators";
 
 const get = createGetter();
 const shallowGet = createGetter(false, true);
@@ -55,8 +55,18 @@ function createGetter(isReadonly = false, shallow = false) {
 }
 
 function createSetter() {
-    return function set (target, key, value, receiver) {
+    return function set (target, key, value, receiver) { // 拦截设置值的功能
+        const oldValue = target[key];
+        const hadKey = isArray(target) && isIntegerKey(key) ?
+            Number(key) < target.length :
+            hasOwn(target, key);
         const result = Reflect.set(target, key, value, receiver)
+
+        if (!hadKey) { // 新增
+            trigger(target, TriggerOrTypes.ADD, key);
+        } else if (hasChanged(oldValue, value)) { // 修改
+            trigger(target, TriggerOrTypes.SET, key, value, oldValue);
+        }
 
         return result;
     }

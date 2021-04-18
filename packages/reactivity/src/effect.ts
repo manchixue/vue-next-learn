@@ -1,3 +1,4 @@
+import {isArray} from "@vue/shared";
 
 export function effect (fn, options: any = {}) {
     // 让这个effect变成响应式的effect 数据变化可以重新执行
@@ -34,7 +35,7 @@ function createReactiveEffect (fn, options) {
 }
 const targetMap = new WeakMap();
 export function track (target, type, key) {
-    if (activeEffect === 'undefined') {
+    if (typeof activeEffect === 'undefined') {
         return;
     }
 
@@ -50,4 +51,39 @@ export function track (target, type, key) {
     if (!deps.has(activeEffect)) {
         deps.add(activeEffect);
     }
+}
+
+export function trigger (target, type, key?, newValue?, oldValue?) {
+    const depsMap = targetMap.get(target);
+
+    // 如果没有收集过依赖, 则不需要做任何操作
+    if (!depsMap) {
+        return;
+    }
+
+    // 收集需要触发的effect
+    const effects = new Set<ReturnType<typeof createReactiveEffect>>();
+    const add = effectsToAdd => {
+        effectsToAdd && effectsToAdd.forEach((effect) => {
+            effects.add(effect);
+        })
+    };
+
+    // 判断是否是数组
+    if (key === 'length' && isArray(target)) {
+        depsMap.forEach((dep, key) => {
+            if (key === 'length' || key > newValue) { // 如果改变的长度小于收集的索引
+                add(dep);
+            }
+        })
+    } else {
+        add(depsMap.get(key));
+    }
+
+
+    console.log(effects);
+
+
+    // 最终触发依赖更新
+    effects.forEach(effect => effect());
 }
